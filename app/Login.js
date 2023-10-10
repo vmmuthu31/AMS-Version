@@ -9,8 +9,6 @@ import {
   TouchableOpacity,
   ToastAndroid,
 } from "react-native";
-import { useDispatch } from "react-redux";
-import { login } from "../slice/authSlice";
 import { Link, router } from "expo-router";
 
 function Login() {
@@ -48,7 +46,6 @@ function Login() {
 
     if (response && response.ok) {
       const data = await response.json();
-      dispatch(login(data));
       ToastAndroid.show("Login Successful!", ToastAndroid.SHORT);
       router.replace("Dashboard");
     } else {

@@ -59,7 +59,7 @@ function Register() {
             }}
           />
         </Link>
-        <Text className="mt-2 text-2xl font-bold mx-8">Login</Text>
+        <Text className="mt-2 text-2xl font-bold mx-8">Signup</Text>
       </View>
       <View className="flex flex-row justify-center space-x-3 py-3 bg-[#009FF8]">
         <Image

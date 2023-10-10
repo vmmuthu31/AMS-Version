@@ -59,7 +59,7 @@ const Home = () => {
                 className="rounded-2xl bg-[#4F14FF] px-6 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
                 onPress={() => {
                   console.log("pressed");
-                  router.replace("/Login");
+                  router.replace("Login");
                 }}
               >
                 <Text className="text-white font-bold text-lg">Login</Text>

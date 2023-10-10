@@ -8,16 +8,16 @@
       "expo-router"
     ],
     "name": "version",
-    "slug": "version",
+    "slug": "jec-ams",
     "extra": {
       "router": {
         "origin": false
       },
       "eas": {
-        "projectId": "d41c01ea-68de-447f-a251-b104336c20d2"
+        "projectId": "743ff48e-9baa-46b5-8e2a-8e6499aee34a"
       }
     },
-    "owner": "zkvm",
+    "owner": "barfi31",
     "android": {
       "package": "com.barfi31.version"
     }

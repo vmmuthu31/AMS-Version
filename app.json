@@ -8,6 +8,18 @@
       "expo-router"
     ],
     "name": "version",
-    "slug": "version"
+    "slug": "version",
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "d41c01ea-68de-447f-a251-b104336c20d2"
+      }
+    },
+    "owner": "zkvm",
+    "android": {
+      "package": "com.barfi31.version"
+    }
   }
 }

@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
 import {
   View,
   Text,
@@ -13,6 +12,7 @@ import * as Print from "expo-print";
 import { shareAsync } from "expo-sharing";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { Link } from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 function generateHTMLTable(attendanceData, selectedDate) {
   let tableRows = "";
@@ -37,12 +37,12 @@ function generateHTMLTable(attendanceData, selectedDate) {
   };
   const departmentLabels = Object.keys(attendanceData);
   const departmentAttendancePercentages = departmentLabels.map((department) => {
-    const deptTotalRegular = Object.values(attendanceData[department]).reduce(
+    const deptTotalRegular = Object.values(attendanceData[department])?.reduce(
       (sum, records) =>
         sum + records.reduce((innerSum, record) => innerSum + record.total, 0),
       0
     );
-    const deptTotalPresent = Object.values(attendanceData[department]).reduce(
+    const deptTotalPresent = Object.values(attendanceData[department])?.reduce(
       (sum, records) =>
         sum +
         records.reduce((innerSum, record) => innerSum + record.present, 0),
@@ -215,15 +215,49 @@ function generateHTMLTable(attendanceData, selectedDate) {
   `;
 }
 
+const retrieveData = async (key) => {
+  try {
+    const itemStr = await AsyncStorage.getItem(key);
+    if (itemStr) {
+      const item = JSON.parse(itemStr);
+
+      // Check if data is older than 1 month (30 days)
+      const oneMonth = 30 * 24 * 60 * 60 * 1000; // 30 days in milliseconds
+      if (Date.now() - item.timestamp > oneMonth) {
+        // Data is expired, remove it
+        await AsyncStorage.removeItem(key);
+        return null;
+      }
+      return item.value;
+    }
+    return null;
+  } catch (error) {
+    // Handle retrieval errors
+  }
+};
 function GetAttendance() {
+  const [userdata, setUserdata] = useState(null);
+  const [role, setRole] = useState(null);
+  const [token, setToken] = useState(null);
+  useEffect(() => {
+    (async () => {
+      const data = await retrieveData("UserData");
+      setUserdata(data);
+      setRole(data.role);
+      setToken(data.token);
+      console.log("token", data.token);
+    })();
+  }, []);
+  useEffect(() => {
+    console.log("userdata", userdata);
+  }, [userdata]);
   const [selectedPrinter, setSelectedPrinter] = React.useState();
-  const role = useSelector((state) => state.auth.role);
 
   const [attendance, setAttendance] = useState([]);
   const [selectedDate, setSelectedDate] = useState(
     new Date().toISOString().split("T")[0]
   );
-  const token = useSelector((state) => state.auth.token);
+
   const [showDatePicker, setShowDatePicker] = useState(false);
   const date = new Date();
 
@@ -254,17 +288,19 @@ function GetAttendance() {
   console.log("selected", selectedDate);
   console.log("attendance", attendance);
   useEffect(() => {
-    fetch("https://ams-back.vercel.app/api/attendance?date=" + selectedDate, {
-      headers: {
-        Authorization: token,
-      },
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        setAttendance(data);
+    if (token) {
+      fetch("https://ams-back.vercel.app/api/attendance?date=" + selectedDate, {
+        headers: {
+          Authorization: token,
+        },
       })
-      .catch((error) => console.error("Error fetching attendance:", error));
-  }, [selectedDate]);
+        .then((res) => res.json())
+        .then((data) => {
+          setAttendance(data);
+        })
+        .catch((error) => console.error("Error fetching attendance:", error));
+    }
+  }, [selectedDate, token]);
   console.log("dep", attendance);
   const groupedAttendanceByDepartment = attendance?.reduce((acc, record) => {
     const { department, year } = record;
@@ -360,7 +396,7 @@ function GetAttendance() {
           />
         )}
       </View>
-      {attendance.length === 0 ? (
+      {attendance?.length === 0 ? (
         <Text className="text-center font-bold text-xl text-red-600 mt-5">
           No data available
         </Text>

@@ -10,13 +10,48 @@ import {
   ScrollView,
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
-import { useSelector } from "react-redux";
 import { Link } from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+const retrieveData = async (key) => {
+  try {
+    const itemStr = await AsyncStorage.getItem(key);
+    if (itemStr) {
+      const item = JSON.parse(itemStr);
+
+      // Check if data is older than 1 month (30 days)
+      const oneMonth = 30 * 24 * 60 * 60 * 1000; // 30 days in milliseconds
+      if (Date.now() - item.timestamp > oneMonth) {
+        // Data is expired, remove it
+        await AsyncStorage.removeItem(key);
+        return null;
+      }
+      return item.value;
+    }
+    return null;
+  } catch (error) {
+    // Handle retrieval errors
+  }
+};
 
 function AddAttendance() {
-  const token = useSelector((state) => state.auth.token);
-  const department = useSelector((state) => state.auth.department);
-  console.log("dep", department);
+  const [userdata, setUserdata] = useState(null);
+  const [department, setDepartment] = useState(null);
+  const [token, setToken] = useState(null);
+
+  useEffect(() => {
+    (async () => {
+      const data = await retrieveData("UserData");
+      setUserdata(data);
+      setDepartment(data.department);
+      setToken(data.token);
+    })();
+  }, []);
+  useEffect(() => {
+    console.log("userdata", userdata);
+    console.log("dep", userdata?.department);
+  }, [userdata]);
+
   const currentDate = new Date().toISOString().split("T")[0];
   const [selectedYear, setSelectedYear] = useState("year1");
   console.log("year", selectedYear);
@@ -75,20 +110,24 @@ function AddAttendance() {
   };
   console.log(getTotalForClass(selectedYear, selectedClass));
   useEffect(() => {
-    async function handleSubmit() {
-      const response = await fetch(
-        `https://ams-back.vercel.app/api/view-total-students?department=${department}`
-      );
-      if (response.ok) {
-        const data = await response.json();
-        console.log("res", data);
-        setFetchData(data);
-      } else {
-        console.error("Failed to fetch data:", response.statusText);
+    if (department) {
+      // Only make the fetch if department is defined
+      async function fetchData() {
+        const response = await fetch(
+          `https://ams-back.vercel.app/api/view-total-students?department=${department}`
+        );
+        if (response.ok) {
+          const data = await response.json();
+          console.log("res", data);
+          setFetchData(data);
+        } else {
+          console.error("Failed to fetch data:", response.statusText);
+        }
       }
+      fetchData();
     }
-    handleSubmit();
-  }, []);
+  }, [department]);
+
   useEffect(() => {
     setFormData1((prevFormData) => ({
       ...prevFormData,

@@ -1,12 +1,44 @@
-import React from "react";
-import { useSelector } from "react-redux";
+import React, { useEffect, useState } from "react";
 import { View, Text, Image, StyleSheet, TouchableOpacity } from "react-native";
 import { Link, router } from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+// Retrieve data and check for expiry
+const retrieveData = async (key) => {
+  try {
+    const itemStr = await AsyncStorage.getItem(key);
+    if (itemStr) {
+      const item = JSON.parse(itemStr);
+
+      // Check if data is older than 1 month (30 days)
+      const oneMonth = 30 * 24 * 60 * 60 * 1000; // 30 days in milliseconds
+      if (Date.now() - item.timestamp > oneMonth) {
+        // Data is expired, remove it
+        await AsyncStorage.removeItem(key);
+        return null;
+      }
+      return item.value;
+    }
+    return null;
+  } catch (error) {
+    // Handle retrieval errors
+  }
+};
 
 function Dashboard() {
-  const email = useSelector((state) => state.auth.email);
-  const department = useSelector((state) => state.auth.department);
-  const role = useSelector((state) => state.auth.role);
+  const [userdata, setUserdata] = useState(null);
+  useEffect(() => {
+    (async () => {
+      const data = await retrieveData("UserData");
+      setUserdata(data);
+    })();
+  }, []);
+  useEffect(() => {
+    console.log("userdata", userdata);
+  }, [userdata]);
+  const role = userdata ? userdata.role : null;
+
+  console.log(role);
   return (
     <View style={styles.container}>
       <View className="bg-white pt-2 flex flex-row text-left justify-between text-xl font-bold px-8  border-b">
@@ -30,10 +62,10 @@ function Dashboard() {
         <Text style={styles.title}>JEC - AMS</Text>
         <View className="bg-white rounded-xl py-5 px-8 mt-10">
           <Text className="text-center text-xl font-bold text-gray-700">
-            Welcome {email?.slice(0, -10)}
+            Welcome {userdata?.email.slice(0, -10)}
           </Text>
           <Text className="text-center  text-xl font-bold text-gray-700">
-            Faculty of {department}
+            Faculty of {userdata?.department}
           </Text>
         </View>
       </View>

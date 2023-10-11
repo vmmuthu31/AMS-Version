@@ -8,12 +8,14 @@ import {
   Image,
   Button,
   BackHandler,
+  Modal,
 } from "react-native";
 import * as Print from "expo-print";
 import { shareAsync } from "expo-sharing";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { Link, router } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { TextInput } from "react-native-gesture-handler";
 
 function generateHTMLTable(attendanceData, selectedDate) {
   let tableRows = "";
@@ -256,6 +258,7 @@ const retrieveData = async (key) => {
     // Handle retrieval errors
   }
 };
+
 function GetAttendance() {
   const backActionHandler = () => {
     router.replace("Dashboard");
@@ -370,6 +373,61 @@ function GetAttendance() {
     };
     return mapping[yearValue] || "Invalid year value";
   }
+  const [isUpdateModalVisible, setUpdateModalVisible] = useState(false);
+  const [updatingRecord, setUpdatingRecord] = useState(null);
+
+  const handleUpdate = (record) => {
+    setUpdatingRecord(record);
+    setUpdateModalVisible(true);
+  };
+
+  const submitUpdatedData = async () => {
+    try {
+      const response = await fetch(
+        `https://ams-back.vercel.app/api/attendance/${updatingRecord._id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: token,
+          },
+          body: JSON.stringify(updatingRecord),
+        }
+      );
+
+      const responseData = await response.json();
+      if (response.ok) {
+        console.log("Update successful:", responseData);
+        // Close the modal
+        setUpdateModalVisible(false);
+        // Re-fetch the attendance data to update the UI
+        fetchAttendanceData(); // We'll define this function in the next step
+      } else {
+        console.error("Update failed:", responseData.error);
+      }
+    } catch (error) {
+      console.error("Error updating attendance:", error);
+    }
+  };
+  const fetchAttendanceData = () => {
+    if (token) {
+      fetch("https://ams-back.vercel.app/api/attendance?date=" + selectedDate, {
+        headers: {
+          Authorization: token,
+        },
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          setAttendance(data);
+        })
+        .catch((error) => console.error("Error fetching attendance:", error));
+    }
+  };
+
+  // Use this function in the useEffect that depends on `selectedDate` and `token`:
+  useEffect(() => {
+    fetchAttendanceData();
+  }, [selectedDate, token]);
 
   return (
     <ScrollView style={styles.container}>
@@ -496,11 +554,86 @@ function GetAttendance() {
                             <Text style={styles.absenteesText}>
                               Absentees Roll Numbers: {record.absentees}
                             </Text>
+                            <View className="flex flex-row justify-end">
+                              <View></View>
+                              <Button
+                                title="Edit"
+                                onPress={() => handleUpdate(record)}
+                              />
+                            </View>
                           </View>
                         );
                       })}
                     </View>
                   ))}
+                {isUpdateModalVisible && (
+                  <Modal
+                    visible={isUpdateModalVisible}
+                    onRequestClose={() => setUpdateModalVisible(false)}
+                    animationType="slide" // Optional: for slide animation
+                    transparent={true} // This makes sure that the modal will cover only a portion of the screen
+                  >
+                    <View style={styles.centeredView}>
+                      <View style={styles.modalView}>
+                        <Text className="text-center font-bold text-xl">
+                          Update Attendance for {updatingRecord.class}
+                        </Text>
+                        <View className="flex  flex-col  my-3">
+                          <View className="flex flex-row ml-2 ">
+                            <Text className="text-lg">Present Count:</Text>
+                            <TextInput
+                              value={String(updatingRecord.present)}
+                              className="border py-0 rounded-lg ml-3 px-4"
+                              onChangeText={(text) => {
+                                const updatedPresent = Number(text);
+                                const updatedAbsent =
+                                  updatingRecord.total - updatedPresent;
+                                setUpdatingRecord({
+                                  ...updatingRecord,
+                                  present: updatedPresent,
+                                  absent: updatedAbsent,
+                                });
+                              }}
+                            />
+                          </View>
+                          <View>
+                            <View className="flex flex-row ml-2 mr-3 space-x-10 my-2">
+                              <Text className="text-lg">Absentees:</Text>
+                              <TextInput
+                                className="border py-0  rounded-lg  px-4"
+                                value={updatingRecord.absentees}
+                                onChangeText={(text) =>
+                                  setUpdatingRecord({
+                                    ...updatingRecord,
+                                    absentees: text,
+                                  })
+                                }
+                              />
+                            </View>
+                          </View>
+                        </View>
+
+                        <View className="flex flex-row justify-center mx-5">
+                          <TouchableHighlight
+                            title="Submit"
+                            onPress={submitUpdatedData}
+                            className="flex flex-row mx-20 justify-center rounded-lg bg-blue-400 px-2 py-2 text-md"
+                          >
+                            <Text className="text-white text-md">Submit</Text>
+                          </TouchableHighlight>
+                          <TouchableHighlight
+                            title="Cancel"
+                            className="flex flex-row mx-20 justify-center rounded-lg bg-red-400 px-2 py-2 text-md"
+                            onPress={() => setUpdateModalVisible(false)}
+                          >
+                            <Text className="text-white text-md">Cancel</Text>
+                          </TouchableHighlight>
+                        </View>
+                      </View>
+                    </View>
+                  </Modal>
+                )}
+
                 <View style={styles.departmentSummary}>
                   <Text style={styles.departmentSummaryText}>
                     Total Number of Students in Department:{" "}
@@ -560,6 +693,26 @@ const styles = StyleSheet.create({
   headerImage: {
     height: 80,
     width: 80,
+  },
+  centeredView: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.5)", // Optional: This will add a semi-transparent dark background
+  },
+  modalView: {
+    width: "80%", // 80% of screen width
+    padding: 20,
+    backgroundColor: "white",
+    borderRadius: 20,
+    elevation: 5, // For Android shadow
+    shadowColor: "#000", // For iOS shadow
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
   },
   title: {
     fontSize: 24,

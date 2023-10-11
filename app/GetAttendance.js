@@ -7,11 +7,12 @@ import {
   TouchableHighlight,
   Image,
   Button,
+  BackHandler,
 } from "react-native";
 import * as Print from "expo-print";
 import { shareAsync } from "expo-sharing";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { Link } from "expo-router";
+import { Link, router } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 function generateHTMLTable(attendanceData, selectedDate) {
@@ -236,6 +237,19 @@ const retrieveData = async (key) => {
   }
 };
 function GetAttendance() {
+  const backActionHandler = () => {
+    router.replace("Dashboard");
+    return true;
+  };
+
+  useEffect(() => {
+    // Add event listener for hardware back button press on Android
+    BackHandler.addEventListener("hardwareBackPress", backActionHandler);
+
+    return () =>
+      // clear/remove event listener
+      BackHandler.removeEventListener("hardwareBackPress", backActionHandler);
+  }, []);
   const [userdata, setUserdata] = useState(null);
   const [role, setRole] = useState(null);
   const [token, setToken] = useState(null);
@@ -370,7 +384,7 @@ function GetAttendance() {
           <Button title="Choose Date" onPress={() => setShowDatePicker(true)} />
           <Text className="pt-1 text-lg"> : {selectedDate}</Text>
         </View>
-        {role !== "hod" && role !== "faculty" && (
+        {role && role !== "hod" && role !== "faculty" && (
           <View>
             <Text className="text-center pt-3 text-lg font-bold">
               Download/Share the attendance report:

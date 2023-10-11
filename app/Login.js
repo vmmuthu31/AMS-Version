@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -8,6 +8,8 @@ import {
   Button,
   TouchableOpacity,
   ScrollView,
+  BackHandler,
+  Alert,
 } from "react-native";
 import { login } from "../slice/authSlice";
 import { ToastAndroid } from "react-native";
@@ -29,6 +31,20 @@ const storeData = async (key, value) => {
 };
 
 function Login() {
+  const backActionHandler = () => {
+    router.replace("/");
+    return true;
+  };
+
+  useEffect(() => {
+    // Add event listener for hardware back button press on Android
+    BackHandler.addEventListener("hardwareBackPress", backActionHandler);
+
+    return () =>
+      // clear/remove event listener
+      BackHandler.removeEventListener("hardwareBackPress", backActionHandler);
+  }, []);
+
   const [formData, setFormData] = useState({
     email: "",
     password: "",

@@ -8,9 +8,10 @@ import {
   StyleSheet,
   ToastAndroid,
   ScrollView,
+  BackHandler,
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
-import { Link } from "expo-router";
+import { Link, router } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const retrieveData = async (key) => {
@@ -35,6 +36,19 @@ const retrieveData = async (key) => {
 };
 
 function AddAttendance() {
+  const backActionHandler = () => {
+    router.replace("Dashboard");
+    return true;
+  };
+
+  useEffect(() => {
+    // Add event listener for hardware back button press on Android
+    BackHandler.addEventListener("hardwareBackPress", backActionHandler);
+
+    return () =>
+      // clear/remove event listener
+      BackHandler.removeEventListener("hardwareBackPress", backActionHandler);
+  }, []);
   const [userdata, setUserdata] = useState(null);
   const [department, setDepartment] = useState(null);
   const [token, setToken] = useState(null);

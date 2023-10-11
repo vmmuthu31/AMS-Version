@@ -12,8 +12,6 @@ import {
 import { Link, router } from "expo-router";
 
 function Login() {
-  const dispatch = useDispatch();
-
   const [formData, setFormData] = useState({
     email: "",
     password: "",

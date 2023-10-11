@@ -22,27 +22,25 @@ const retrieveData = async (key) => {
     }
     return null;
   } catch (error) {
-    // Handle retrieval errors
+    console.error("Failed to retrieve data:", error);
+    return null;
   }
 };
 
 export default function Page() {
   const [userdata, setUserdata] = useState(null);
+
   useEffect(() => {
-    (async () => {
+    const fetchData = async () => {
       const data = await retrieveData("UserData");
       setUserdata(data);
-    })();
+      console.log("userdata", data);
+    };
+
+    fetchData();
   }, []);
-  useEffect(() => {
-    console.log("userdata", userdata);
-  }, [userdata]);
+
   return (
-    <Provider store={store}>
-      {userdata ? <Dashboard /> : <Home />}
-      <Home />
-    </Provider>
+    <Provider store={store}>{userdata ? <Dashboard /> : <Home />}</Provider>
   );
 }
-
-// ... styles remain unchanged

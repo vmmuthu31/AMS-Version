@@ -58,6 +58,15 @@ function Login() {
   };
 
   const handleSubmit = async () => {
+    // Check if the email or password fields are empty
+    if (!formData.email.trim() || !formData.password.trim()) {
+      ToastAndroid.show(
+        "Please enter both email and password!",
+        ToastAndroid.SHORT
+      );
+      return;
+    }
+
     const response = await fetch("https://ams-back.vercel.app/api/login", {
       method: "POST",
       headers: {

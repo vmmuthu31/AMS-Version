@@ -25,6 +25,15 @@ const retrieveData = async (key) => {
   }
 };
 
+async function removeItemValue(key) {
+  try {
+    await AsyncStorage.removeItem(key);
+    return true;
+  } catch (exception) {
+    return false;
+  }
+}
+
 function Dashboard() {
   const [userdata, setUserdata] = useState(null);
   useEffect(() => {
@@ -37,20 +46,24 @@ function Dashboard() {
     console.log("userdata", userdata);
   }, [userdata]);
   const role = userdata ? userdata.role : null;
+  const handleLogout = async () => {
+    await removeItemValue("UserData");
+    router.replace("/");
+  };
 
   console.log(role);
   return (
     <View style={styles.container}>
       <View className="bg-white pt-2 flex flex-row text-left justify-between text-xl font-bold px-8  border-b">
         <Text className="mt-2 text-2xl font-bold mx-4">Dashboard</Text>
-        <Link className="pb-6" href="/Home">
+        <TouchableOpacity className="pb-6" onPress={handleLogout}>
           <Image
             className="h-7 w-7 bg-white "
             source={{
               uri: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTk8rXmrbwkvOlRL-sbIRH2WiY5rkThzKMx9g&usqp=CAU",
             }}
           />
-        </Link>
+        </TouchableOpacity>
       </View>
       <View style={styles.header}>
         <Image

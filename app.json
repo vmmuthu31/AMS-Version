@@ -7,7 +7,7 @@
     "plugins": [
       "expo-router"
     ],
-    "name": "version",
+    "name": "JEC-AMS",
     "slug": "muthu",
     "extra": {
       "router": {

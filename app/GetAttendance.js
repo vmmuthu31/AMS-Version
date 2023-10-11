@@ -55,7 +55,25 @@ function generateHTMLTable(attendanceData, selectedDate) {
   Object.entries(attendanceData).forEach(([department, yearRecords]) => {
     let deptTotalRegular = 0;
     let deptTotalPresent = 0;
+    let recordsProcessed = 0;
+    let lowestAttendancePercentage = 100; // Initialize with 100 as the starting point
+    let departmentWithLowestAttendance;
+    let highestAbsentCount = 0; // Initialize with 0 as the starting point
+    let departmentWithHighestAbsent;
+
     let deptTotalAbsent = 0;
+    const deptAttendancePercentage =
+      (deptTotalPresent / deptTotalRegular) * 100;
+    if (deptAttendancePercentage < lowestAttendancePercentage) {
+      lowestAttendancePercentage = deptAttendancePercentage;
+      departmentWithLowestAttendance = department;
+    }
+
+    // Check for highest absent count for department
+    if (deptTotalAbsent > highestAbsentCount) {
+      highestAbsentCount = deptTotalAbsent;
+      departmentWithHighestAbsent = department;
+    }
 
     // Calculate department totals first
     Object.values(yearRecords).forEach((records) => {
@@ -78,28 +96,30 @@ function generateHTMLTable(attendanceData, selectedDate) {
       (sum, records) => sum + records.length,
       0
     );
-    let recordsProcessed = 0;
-
     Object.entries(yearRecords)
       .sort(([a], [b]) => a.localeCompare(b))
       .map(([year, records]) => {
         records.forEach((record) => {
           const percentage = ((record.present / record.total) * 100).toFixed(2);
-          tableRows += `<tr style="background-color: ${
-            departmentColors[department] || "#FFFFFF"
-          };">`;
+          const isBelowThreshold = parseFloat(percentage) < 75;
+          const defaultColor = departmentColors[department] || "#FFFFFF";
+          const colorStyle = isBelowThreshold
+            ? 'style="background-color: #FF0000; color: white"'
+            : `style="background-color: ${defaultColor};"`;
+
+          tableRows += "<tr>";
 
           if (recordsProcessed === 0) {
             tableRows += `
-            <td rowspan="${totalRecords}">${department}</td>
-            <td>${getOrdinal(year)}</td>
-            <td>${record.total}</td>
-            <td>${record.present}</td>
-            <td>${record.absent}</td>
-            <td>${percentage}%</td>
-            <td rowspan="${totalRecords}">${deptTotalRegular}</td>
-            <td rowspan="${totalRecords}">${deptTotalPresent}</td>
-            <td rowspan="${totalRecords}">${(
+          <td rowspan="${totalRecords}" style="background-color: ${defaultColor}">${department}</td>
+          <td ${colorStyle}>${getOrdinal(year)}</td>
+          <td ${colorStyle}>${record.total}</td>
+          <td ${colorStyle}>${record.present}</td>
+          <td ${colorStyle}>${record.absent}</td>
+          <td ${colorStyle}>${percentage}%</td>
+          <td rowspan="${totalRecords}" style="background-color: ${defaultColor}">${deptTotalRegular}</td>
+          <td rowspan="${totalRecords}" style="background-color: ${defaultColor}">${deptTotalPresent}</td>
+          <td rowspan="${totalRecords}" style="background-color: ${defaultColor}">${(
               (deptTotalPresent / deptTotalRegular) *
               100
             ).toFixed(2)}%</td>
@@ -107,11 +127,11 @@ function generateHTMLTable(attendanceData, selectedDate) {
           `;
           } else {
             tableRows += `
-            <td>${getOrdinal(year)}</td>
-            <td>${record.total}</td>
-            <td>${record.present}</td>
-            <td>${record.absent}</td>
-            <td>${percentage}%</td>
+          <td ${colorStyle}>${getOrdinal(year)}</td>
+          <td ${colorStyle}>${record.total}</td>
+          <td ${colorStyle}>${record.present}</td>
+          <td ${colorStyle}>${record.absent}</td>
+          <td ${colorStyle}>${percentage}%</td>
           </tr>
           `;
           }

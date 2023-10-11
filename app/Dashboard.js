@@ -78,7 +78,7 @@ function Dashboard() {
             Welcome {userdata?.email.slice(0, -10)}
           </Text>
           <Text className="text-center  text-xl font-bold text-gray-700">
-            Faculty of {userdata?.department}
+            {userdata?.role} of {userdata?.department}
           </Text>
         </View>
       </View>

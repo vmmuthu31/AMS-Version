@@ -193,9 +193,6 @@ function AddAttendance() {
                 onValueChange={(itemValue) => {
                   setSelectedYear(itemValue);
                   handleInputChange("year", itemValue);
-                  if (itemValue === "year1") {
-                    setDepartment("year1");
-                  }
                 }}
               >
                 <Picker.Item label="Year 1" value="year1" />

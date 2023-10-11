@@ -9,6 +9,7 @@
     ],
     "name": "JEC-AMS",
     "slug": "muthu",
+    "icon": "./assets/icon.png",
     "extra": {
       "router": {
         "origin": false

@@ -19,20 +19,15 @@ const retrieveData = async (key) => {
     const itemStr = await AsyncStorage.getItem(key);
     if (itemStr) {
       const item = JSON.parse(itemStr);
-
-      // Check if data is older than 1 month (30 days)
-      const oneMonth = 30 * 24 * 60 * 60 * 1000; // 30 days in milliseconds
+      const oneMonth = 30 * 24 * 60 * 60 * 1000;
       if (Date.now() - item.timestamp > oneMonth) {
-        // Data is expired, remove it
         await AsyncStorage.removeItem(key);
         return null;
       }
       return item.value;
     }
     return null;
-  } catch (error) {
-    // Handle retrieval errors
-  }
+  } catch (error) {}
 };
 
 function AddAttendance() {
@@ -42,11 +37,9 @@ function AddAttendance() {
   };
 
   useEffect(() => {
-    // Add event listener for hardware back button press on Android
     BackHandler.addEventListener("hardwareBackPress", backActionHandler);
 
     return () =>
-      // clear/remove event listener
       BackHandler.removeEventListener("hardwareBackPress", backActionHandler);
   }, []);
   const [userdata, setUserdata] = useState(null);
@@ -70,29 +63,6 @@ function AddAttendance() {
   const [selectedYear, setSelectedYear] = useState("year1");
   console.log("year", selectedYear);
   const [fetchdata, setFetchData] = useState();
-  const [formData, setFormData] = useState({
-    class: "",
-    year1: {
-      total: "",
-      present: "",
-      absentees: "",
-    },
-    year2: {
-      total: "",
-      present: "",
-      absentees: "",
-    },
-    year3: {
-      total: "",
-      present: "",
-      absentees: "",
-    },
-    year4: {
-      total: "",
-      present: "",
-      absentees: "",
-    },
-  });
 
   const showToast = (message) => {
     ToastAndroid.showWithGravityAndOffset(
@@ -223,6 +193,9 @@ function AddAttendance() {
                 onValueChange={(itemValue) => {
                   setSelectedYear(itemValue);
                   handleInputChange("year", itemValue);
+                  if (itemValue === "year1") {
+                    setDepartment("year1");
+                  }
                 }}
               >
                 <Picker.Item label="Year 1" value="year1" />

@@ -186,21 +186,27 @@ function AddAttendance() {
         </Text>
         <View className="mx-6 mt-5">
           <View>
-            <Text>Select Year:</Text>
-            <View className="border my-2 rounded-sm">
-              <Picker
-                selectedValue={selectedYear}
-                onValueChange={(itemValue) => {
-                  setSelectedYear(itemValue);
-                  handleInputChange("year", itemValue);
-                }}
-              >
-                <Picker.Item label="Year 1" value="year1" />
-                <Picker.Item label="Year 2" value="year2" />
-                <Picker.Item label="Year 3" value="year3" />
-                <Picker.Item label="Year 4" value="year4" />
-              </Picker>
-            </View>
+            {department === "I YEAR" ? (
+              <></>
+            ) : (
+              <>
+                <Text>Select Year:</Text>
+                <View className="border my-2 rounded-sm">
+                  <Picker
+                    selectedValue={selectedYear}
+                    onValueChange={(itemValue) => {
+                      setSelectedYear(itemValue);
+                      handleInputChange("year", itemValue);
+                    }}
+                  >
+                    <Picker.Item label="Year 2" value="year2" />
+                    <Picker.Item label="Year 3" value="year3" />
+                    <Picker.Item label="Year 4" value="year4" />
+                  </Picker>
+                </View>
+              </>
+            )}
+
             <Text>Select Class Section:</Text>
             <View className="border my-2 rounded-sm">
               <Picker

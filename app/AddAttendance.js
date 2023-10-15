@@ -60,7 +60,7 @@ function AddAttendance() {
   }, [userdata]);
 
   const currentDate = new Date().toISOString().split("T")[0];
-  const [selectedYear, setSelectedYear] = useState("year1");
+  const [selectedYear, setSelectedYear] = useState("year2");
   console.log("year", selectedYear);
   const [fetchdata, setFetchData] = useState();
 
@@ -86,12 +86,20 @@ function AddAttendance() {
     if (
       fetchdata &&
       fetchdata[selectedYear] &&
-      fetchdata[selectedYear].class === selectedClass
+      fetchdata[selectedYear].classes
     ) {
-      return fetchdata[selectedYear].total;
+      const classesInYear = fetchdata[selectedYear].classes;
+      const classObject = classesInYear.find(
+        (classObj) => classObj.className === selectedClass
+      );
+
+      if (classObject) {
+        return classObject.total;
+      }
     }
     return 0;
   };
+
   console.log(getTotalForClass(selectedYear, selectedClass));
   useEffect(() => {
     if (department) {
@@ -217,9 +225,13 @@ function AddAttendance() {
                 }}
               >
                 <Picker.Item label="A" value="A" />
-                <Picker.Item label="B" value="B" />
+                {fetchdata &&
+                  fetchdata[selectedYear].classes[1]?.className === "B" && (
+                    <Picker.Item label="B" value="B" />
+                  )}
               </Picker>
             </View>
+
             <View>
               <Text className="">
                 Total Students: {getTotalForClass(selectedYear, selectedClass)}

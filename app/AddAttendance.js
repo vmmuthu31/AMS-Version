@@ -100,8 +100,25 @@ function AddAttendance() {
     }
     return 0;
   };
+  const getRegularForClass = (selectedYear, selectedClass) => {
+    if (
+      fetchdata &&
+      fetchdata[selectedYear] &&
+      fetchdata[selectedYear].classes
+    ) {
+      const classesInYear = fetchdata[selectedYear].classes;
+      const classObject = classesInYear.find(
+        (classObj) => classObj.className === selectedClass
+      );
 
-  console.log(getTotalForClass(selectedYear, selectedClass));
+      if (classObject) {
+        return classObject.regular;
+      }
+    }
+    return 0;
+  };
+
+  console.log("sam", getRegularForClass(selectedYear, selectedClass));
   useEffect(() => {
     if (department) {
       // Only make the fetch if department is defined
@@ -126,8 +143,9 @@ function AddAttendance() {
       ...prevFormData,
       department: department,
       total: getTotalForClass(selectedYear, selectedClass),
+      regular: getRegularForClass(selectedYear, selectedClass),
       absent:
-        getTotalForClass(selectedYear, selectedClass) -
+        getRegularForClass(selectedYear, selectedClass) -
         (prevFormData.present ? parseInt(prevFormData.present) : 0),
     }));
   }, [selectedYear, selectedClass, fetchdata, department]);
@@ -138,6 +156,7 @@ function AddAttendance() {
     total: getTotalForClass(selectedYear, selectedClass),
     department: department,
     present: "",
+    regular: getRegularForClass(selectedYear, selectedClass),
     year: selectedYear,
     absentees: "",
     absent: "",
@@ -146,10 +165,13 @@ function AddAttendance() {
   const [formData1, setFormData1] = useState(initialFormData);
 
   formData1.absent =
-    getTotalForClass(selectedYear, selectedClass) - formData1.present;
+    getRegularForClass(selectedYear, selectedClass) - formData1.present;
 
   const handleSubmit = async () => {
-    console.log("vm", getTotalForClass(selectedYear, selectedClass).toString());
+    console.log(
+      "vm",
+      getRegularForClass(selectedYear, selectedClass).toString()
+    );
     console.log("deparment", department);
     console.log(formData1);
     console.log("secl");
@@ -238,7 +260,8 @@ function AddAttendance() {
 
             <View>
               <Text className="">
-                Total Students: {getTotalForClass(selectedYear, selectedClass)}
+                Total Students:{" "}
+                {getRegularForClass(selectedYear, selectedClass)}
               </Text>
             </View>
           </View>
@@ -258,7 +281,7 @@ function AddAttendance() {
           />
           <Text className="my-1">
             Absentee Count:
-            {formData1.total -
+            {formData1.regular -
               (formData1.present ? parseInt(formData1.present) : 0)}
           </Text>
 

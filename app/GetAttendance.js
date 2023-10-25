@@ -19,6 +19,7 @@ import { TextInput } from "react-native-gesture-handler";
 
 function generateHTMLTable(attendanceData, selectedDate) {
   let tableRows = "";
+  let grandTotalTotal = 0;
   let grandTotalRegular = 0;
   let grandTotalPresent = 0;
   let grandTotalAbsent = 0;
@@ -42,7 +43,8 @@ function generateHTMLTable(attendanceData, selectedDate) {
   const departmentAttendancePercentages = departmentLabels.map((department) => {
     const deptTotalRegular = Object.values(attendanceData[department])?.reduce(
       (sum, records) =>
-        sum + records.reduce((innerSum, record) => innerSum + record.total, 0),
+        sum +
+        records.reduce((innerSum, record) => innerSum + record.regular, 0),
       0
     );
     const deptTotalPresent = Object.values(attendanceData[department])?.reduce(
@@ -55,6 +57,7 @@ function generateHTMLTable(attendanceData, selectedDate) {
   });
 
   Object.entries(attendanceData).forEach(([department, yearRecords]) => {
+    let deptTotalTotal = 0;
     let deptTotalRegular = 0;
     let deptTotalPresent = 0;
     let recordsProcessed = 0;
@@ -80,7 +83,8 @@ function generateHTMLTable(attendanceData, selectedDate) {
     // Calculate department totals first
     Object.values(yearRecords).forEach((records) => {
       records.forEach((record) => {
-        deptTotalRegular += record.total;
+        deptTotalTotal += record.total;
+        deptTotalRegular += record.regular;
         deptTotalPresent += record.present;
         deptTotalAbsent += record.absent;
       });
@@ -102,7 +106,9 @@ function generateHTMLTable(attendanceData, selectedDate) {
       .sort(([a], [b]) => a.localeCompare(b))
       .map(([year, records]) => {
         records.forEach((record) => {
-          const percentage = ((record.present / record.total) * 100).toFixed(2);
+          const percentage = ((record.present / record.regular) * 100).toFixed(
+            2
+          );
           const isBelowThreshold = parseFloat(percentage) < 75;
           const defaultColor = departmentColors[department] || "#FFFFFF";
           const colorStyle = isBelowThreshold
@@ -116,9 +122,11 @@ function generateHTMLTable(attendanceData, selectedDate) {
           <td rowspan="${totalRecords}" style="background-color: ${defaultColor}">${department}</td>
           <td ${colorStyle}>${getOrdinal(year)}</td>
           <td ${colorStyle}>${record.total}</td>
+          <td ${colorStyle}>${record.regular}</td>
           <td ${colorStyle}>${record.present}</td>
           <td ${colorStyle}>${record.absent}</td>
           <td ${colorStyle}>${percentage}%</td>
+          <td rowspan="${totalRecords}" style="background-color: ${defaultColor}">${deptTotalTotal}</td>
           <td rowspan="${totalRecords}" style="background-color: ${defaultColor}">${deptTotalRegular}</td>
           <td rowspan="${totalRecords}" style="background-color: ${defaultColor}">${deptTotalPresent}</td>
           <td rowspan="${totalRecords}" style="background-color: ${defaultColor}">${(
@@ -131,6 +139,7 @@ function generateHTMLTable(attendanceData, selectedDate) {
             tableRows += `
           <td ${colorStyle}>${getOrdinal(year)}</td>
           <td ${colorStyle}>${record.total}</td>
+          <td ${colorStyle}>${record.regular}</td>
           <td ${colorStyle}>${record.present}</td>
           <td ${colorStyle}>${record.absent}</td>
           <td ${colorStyle}>${percentage}%</td>
@@ -140,7 +149,7 @@ function generateHTMLTable(attendanceData, selectedDate) {
           recordsProcessed++;
         });
       });
-
+    grandTotalTotal += deptTotalTotal;
     grandTotalRegular += deptTotalRegular;
     grandTotalPresent += deptTotalPresent;
     grandTotalAbsent += deptTotalAbsent;
@@ -167,11 +176,13 @@ function generateHTMLTable(attendanceData, selectedDate) {
               <th>DEPT</th>
               <th>YEAR</th>
               <th>TOTAL</th>
+              <th>Regular</th>
               <th>PRESENT</th>
               <th>ABSENT</th>
               <th>ATT. PERCENTAGE</th>
               <th>DEPT. TOTAL</th>
               <th>TOTAL REG. STUD</th>
+              <th>TOT. Presnt</th>
               <th>TOT. PRESENT DEPT. %</th>
             </tr>
           </thead>
@@ -180,15 +191,17 @@ function generateHTMLTable(attendanceData, selectedDate) {
             <tr>
               <td>Total</td>
               <td></td>
+              <td>${grandTotalTotal}</td>
               <td>${grandTotalRegular}</td>
-              <td>${grandTotalPresent}</td>
+               <td>${grandTotalPresent}</td>
               <td>${grandTotalAbsent}</td>
               <td>${((grandTotalPresent / grandTotalRegular) * 100).toFixed(
                 2
               )}%</td>
-              <td>${grandDeptTotal}</td>
+              <td>${grandTotalTotal}</td>
+              <td>${grandTotalRegular}</td>
               <td>${grandTotalPresent}</td>
-              <td>${((grandTotalPresent / grandDeptTotal) * 100).toFixed(
+              <td>${((grandTotalPresent / grandTotalRegular) * 100).toFixed(
                 2
               )}%</td>
             </tr>
@@ -354,11 +367,12 @@ function GetAttendance() {
   const aggregateDataByDepartment = Object.entries(
     groupedAttendanceByDepartment
   ).reduce((acc, [department, yearRecords]) => {
-    acc[department] = { total: 0, present: 0, absent: 0 };
+    acc[department] = { total: 0, present: 0, absent: 0, regular: 0 };
     Object.values(yearRecords).forEach((records) => {
       records.forEach((record) => {
         acc[department].total += record.total;
         acc[department].present += record.present;
+        acc[department].regular += record.regular;
         acc[department].absent += record.absent;
       });
     });
@@ -384,7 +398,7 @@ function GetAttendance() {
   const submitUpdatedData = async () => {
     try {
       const response = await fetch(
-        `https://ams-back.vercel.app/api/ /${updatingRecord._id}`,
+        `https://ams-back.vercel.app/api/attendance/${updatingRecord._id}`,
         {
           method: "PUT",
           headers: {
@@ -515,7 +529,7 @@ function GetAttendance() {
                       </Text>
                       {records.map((record) => {
                         const percentage =
-                          (record.present / record.total) * 100;
+                          (record.present / record.regular) * 100;
                         return (
                           <View
                             key={record._id}
@@ -545,7 +559,10 @@ function GetAttendance() {
                             </View>
                             <View style={styles.recordSubHeader}>
                               <Text style={styles.recordSubHeaderText}>
-                                No. OF PRESENT: {record.present}
+                                No. OF Regular: {record.regular}
+                              </Text>
+                              <Text style={styles.recordSubHeaderText}>
+                                Present: {record.present}
                               </Text>
                               <Text style={styles.recordSubHeaderText}>
                                 NO. OF ABSENT: {record.absent}
@@ -587,7 +604,7 @@ function GetAttendance() {
                               onChangeText={(text) => {
                                 const updatedPresent = Number(text);
                                 const updatedAbsent =
-                                  updatingRecord.total - updatedPresent;
+                                  updatingRecord.regular - updatedPresent;
                                 setUpdatingRecord({
                                   ...updatingRecord,
                                   present: updatedPresent,
@@ -640,6 +657,10 @@ function GetAttendance() {
                     {aggregateDataByDepartment[department].total}
                   </Text>
                   <Text style={styles.departmentSummaryText}>
+                    Total Regular:{" "}
+                    {aggregateDataByDepartment[department].regular}
+                  </Text>
+                  <Text style={styles.departmentSummaryText}>
                     Total Present:{" "}
                     {aggregateDataByDepartment[department].present}
                   </Text>
@@ -650,12 +671,12 @@ function GetAttendance() {
                     style={[
                       styles.departmentSummaryText,
                       (aggregateDataByDepartment[department].present /
-                        aggregateDataByDepartment[department].total) *
+                        aggregateDataByDepartment[department].regular) *
                         100 <
                       50
                         ? styles.redText
                         : (aggregateDataByDepartment[department].present /
-                            aggregateDataByDepartment[department].total) *
+                            aggregateDataByDepartment[department].regular) *
                             100 <
                           75
                         ? styles.orangeText
@@ -665,7 +686,7 @@ function GetAttendance() {
                     Department Percentage:{" "}
                     {(
                       (aggregateDataByDepartment[department].present /
-                        aggregateDataByDepartment[department].total) *
+                        aggregateDataByDepartment[department].regular) *
                       100
                     ).toFixed(2)}
                     %

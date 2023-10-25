@@ -83,16 +83,38 @@ function Dashboard() {
         </View>
       </View>
       <View className="mt-20 mx-10">
-        <TouchableOpacity
-          className="flex flex-row justify-center bg-[#4F14FF] rounded-lg mx-5  py-3 text-white"
-          onPress={() => {
-            router.replace("/GetAttendance");
-          }}
-        >
-          <Text className="text-white font-bold ">View Attendance</Text>
-        </TouchableOpacity>
-        {role !== "superadmin" && (
+        {role === "superadmin" ? (
           <>
+            <TouchableOpacity
+              className="flex flex-row justify-center bg-[#4F14FF] rounded-lg mx-5  py-3 text-white"
+              onPress={() => {
+                router.replace("/GetAttendance");
+              }}
+            >
+              <Text className="text-white font-bold ">View Attendance</Text>
+            </TouchableOpacity>
+            <Text className="text-center py-3 text-xl font-bold">Or</Text>
+            <TouchableOpacity
+              className="flex flex-row justify-center  bg-[#4F14FF] rounded-lg mx-5  py-3 text-white"
+              onPress={() => {
+                router.replace("/UpdateStudentData");
+              }}
+            >
+              <Text className="text-white font-bold ">
+                Update Student Count
+              </Text>
+            </TouchableOpacity>
+          </>
+        ) : (
+          <>
+            <TouchableOpacity
+              className="flex flex-row justify-center bg-[#4F14FF] rounded-lg mx-5  py-3 text-white"
+              onPress={() => {
+                router.replace("/GetAttendance");
+              }}
+            >
+              <Text className="text-white font-bold ">View Attendance</Text>
+            </TouchableOpacity>
             <Text className="text-center py-3 text-xl font-bold">Or</Text>
             <TouchableOpacity
               className="flex flex-row justify-center bg-[#4F14FF] rounded-lg mx-5  py-3 text-white"

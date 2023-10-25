@@ -30,7 +30,7 @@ const retrieveData = async (key) => {
   } catch (error) {}
 };
 
-function AddAttendance() {
+function UpdateStudentData() {
   const backActionHandler = () => {
     router.replace("Dashboard");
     return true;
@@ -50,7 +50,7 @@ function AddAttendance() {
     (async () => {
       const data = await retrieveData("UserData");
       setUserdata(data);
-      setDepartment(data.department);
+      //setDepartment(data.department);
       console.log("user data dep", data.department);
       setToken(data.token);
     })();
@@ -180,7 +180,9 @@ function AddAttendance() {
             }}
           />
         </Link>
-        <Text className="mt-2 text-2xl font-bold mx-8">Put Attendance</Text>
+        <Text className="mt-2 text-2xl font-bold mx-8">
+          Update Student Count
+        </Text>
       </View>
       <View>
         <View className="flex flex-row justify-center space-x-3 py-3 bg-[#009FF8]">
@@ -197,6 +199,53 @@ function AddAttendance() {
           today.
         </Text>
         <View className="mx-6 mt-5">
+          <Text>Select Department:</Text>
+          <View className="border my-2 rounded-sm">
+            <Picker
+              selectedValue={department}
+              onValueChange={(itemValue) => {
+                setDepartment(itemValue);
+                handleInputChange("department", itemValue);
+              }}
+            >
+              <Picker.Item label="AERO" value="AERO">
+                AERO
+              </Picker.Item>
+              <Picker.Item label="CIVIL" value="CIVIL">
+                CIVIL
+              </Picker.Item>
+              <Picker.Item label="CSE" value="CSE">
+                CSE
+              </Picker.Item>
+              <Picker.Item label="ECE" value="ECE">
+                ECE
+              </Picker.Item>
+              <Picker.Item label="EEE" value="EEE">
+                EEE
+              </Picker.Item>
+              <Picker.Item label="EIE" value="EIE">
+                EIE
+              </Picker.Item>
+              <Picker.Item label="MECH" value="MECH">
+                MECH
+              </Picker.Item>
+              <Picker.Item label="IT" value="IT">
+                IT
+              </Picker.Item>
+              <Picker.Item label="TEX" value="TEX">
+                TEX
+              </Picker.Item>
+              <Picker.Item label="I YEAR" value="I YEAR">
+                I YEAR
+              </Picker.Item>
+              <Picker.Item label="MBA" value="MBA">
+                MBA
+              </Picker.Item>
+              <Picker.Item label="MCA" value="MCA">
+                MCA
+              </Picker.Item>
+            </Picker>
+          </View>
           <View>
             {department === "I YEAR" ? (
               <></>
@@ -235,36 +284,30 @@ function AddAttendance() {
                   )}
               </Picker>
             </View>
-
-            <View>
-              <Text className="">
-                Total Students: {getTotalForClass(selectedYear, selectedClass)}
-              </Text>
-            </View>
           </View>
-          <Text className="mt-2">Students Present</Text>
+          <Text className="mt-2">
+            Total Students Count:
+            {getTotalForClass(selectedYear, selectedClass)}
+          </Text>
           <TextInput
             value={formData1.present}
             onChangeText={(value) => handleInputChange("present", value)}
             style={styles.input}
             placeholder="  Students Present"
           />
-          <Text>Absentees Number</Text>
+          <Text>
+            Total Regular Students:
+            {getTotalForClass(selectedYear, selectedClass)}
+          </Text>
           <TextInput
             value={formData1.absentees}
             onChangeText={(value) => handleInputChange("absentees", value)}
             style={styles.input}
             placeholder="Absentees Number"
           />
-          <Text className="my-1">
-            Absentee Count:
-            {formData1.total -
-              (formData1.present ? parseInt(formData1.present) : 0)}
-          </Text>
-
           <Button
             className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-            title="Upload"
+            title="Update"
             onPress={handleSubmit}
           />
         </View>
@@ -308,4 +351,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default AddAttendance;
+export default UpdateStudentData;

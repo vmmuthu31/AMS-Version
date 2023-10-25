@@ -384,7 +384,7 @@ function GetAttendance() {
   const submitUpdatedData = async () => {
     try {
       const response = await fetch(
-        `https://ams-back.vercel.app/api/attendance/${updatingRecord._id}`,
+        `https://ams-back.vercel.app/api/ /${updatingRecord._id}`,
         {
           method: "PUT",
           headers: {
@@ -600,7 +600,7 @@ function GetAttendance() {
                             <View className="flex flex-row ml-2 mr-3 space-x-10 my-2">
                               <Text className="text-lg">Absentees:</Text>
                               <TextInput
-                                className="border py-0  rounded-lg  px-4"
+                                className="border py-0 w-32 rounded-md  pl-2"
                                 value={updatingRecord.absentees}
                                 onChangeText={(text) =>
                                   setUpdatingRecord({

@@ -87,9 +87,9 @@ function AddAttendance() {
     if (
       fetchdata &&
       fetchdata[selectedYear] &&
-      fetchdata[selectedYear].classes
+      fetchdata[selectedYear]?.classes
     ) {
-      const classesInYear = fetchdata[selectedYear].classes;
+      const classesInYear = fetchdata[selectedYear]?.classes;
       const classObject = classesInYear.find(
         (classObj) => classObj.className === selectedClass
       );
@@ -104,9 +104,9 @@ function AddAttendance() {
     if (
       fetchdata &&
       fetchdata[selectedYear] &&
-      fetchdata[selectedYear].classes
+      fetchdata[selectedYear]?.classes
     ) {
-      const classesInYear = fetchdata[selectedYear].classes;
+      const classesInYear = fetchdata[selectedYear]?.classes;
       const classObject = classesInYear.find(
         (classObj) => classObj.className === selectedClass
       );
@@ -220,7 +220,28 @@ function AddAttendance() {
         </Text>
         <View className="mx-6 mt-5">
           <View>
-            {department === "I YEAR" ? (
+            {department === "MCA" || department === "MBA" ? (
+              <>
+                <Text>Select Year:</Text>
+                <View className="border my-2 rounded-sm">
+                  <Picker
+                    selectedValue={selectedYear}
+                    onValueChange={(itemValue) => {
+                      setSelectedYear(itemValue);
+                      handleInputChange("year", itemValue);
+                    }}
+                  >
+                    <Picker.Item label="Year 1" value="year1" />
+                    <Picker.Item label="Year 2" value="year2" />
+                  </Picker>
+                </View>
+              </>
+            ) : (
+              <></>
+            )}
+            {department === "I YEAR" ||
+            department === "MCA" ||
+            department === "MBA" ? (
               <></>
             ) : (
               <>
@@ -252,7 +273,7 @@ function AddAttendance() {
               >
                 <Picker.Item label="A" value="A" />
                 {fetchdata &&
-                  fetchdata[selectedYear].classes[1]?.className === "B" && (
+                  fetchdata[selectedYear]?.classes[1]?.className === "B" && (
                     <Picker.Item label="B" value="B" />
                   )}
               </Picker>

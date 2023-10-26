@@ -43,21 +43,19 @@ function UpdateStudentData() {
       BackHandler.removeEventListener("hardwareBackPress", backActionHandler);
   }, []);
   const [userdata, setUserdata] = useState(null);
-  const [department, setDepartment] = useState("");
+  const [department, setDepartment] = useState("AERO");
   const [token, setToken] = useState(null);
 
   useEffect(() => {
     (async () => {
       const data = await retrieveData("UserData");
       setUserdata(data);
-      //setDepartment(data.department);
       console.log("user data dep", data.department);
       setToken(data.token);
     })();
   }, []);
   useEffect(() => {
     console.log("userdata", userdata);
-    console.log("dep", userdata?.department);
   }, [userdata]);
 
   const currentDate = new Date().toISOString().split("T")[0];
@@ -87,9 +85,9 @@ function UpdateStudentData() {
     if (
       fetchdata &&
       fetchdata[selectedYear] &&
-      fetchdata[selectedYear].classes
+      fetchdata[selectedYear]?.classes
     ) {
-      const classesInYear = fetchdata[selectedYear].classes;
+      const classesInYear = fetchdata[selectedYear]?.classes;
       const classObject = classesInYear.find(
         (classObj) => classObj.className === selectedClass
       );
@@ -100,11 +98,33 @@ function UpdateStudentData() {
     }
     return 0;
   };
+  const getRegularForClass = (selectedYear, selectedClass) => {
+    if (
+      fetchdata &&
+      fetchdata[selectedYear] &&
+      fetchdata[selectedYear]?.classes
+    ) {
+      const classesInYear = fetchdata[selectedYear]?.classes;
+      const classObject = classesInYear.find(
+        (classObj) => classObj.className === selectedClass
+      );
 
-  console.log(getTotalForClass(selectedYear, selectedClass));
+      if (classObject) {
+        return classObject.regular;
+      }
+    }
+    return 0;
+  };
+
+  console.log("total", getTotalForClass(selectedYear, selectedClass));
+  console.log("regular", getRegularForClass(selectedYear, selectedClass));
+  const [refreshData, setRefreshData] = useState(false);
+
   useEffect(() => {
     if (department) {
-      // Only make the fetch if department is defined
+      if (department === "I YEAR") {
+        setSelectedYear("year1");
+      }
       async function fetchData() {
         const response = await fetch(
           `https://ams-back.vercel.app/api/view-total-students?department=${department}`
@@ -119,54 +139,76 @@ function UpdateStudentData() {
       }
       fetchData();
     }
-  }, [department]);
+  }, [department, refreshData]);
+
+  const [updatetotal, setUpdatetotal] = useState();
+  const [updateRegular, setUpdateRegular] = useState();
 
   useEffect(() => {
-    setFormData1((prevFormData) => ({
-      ...prevFormData,
+    const newFormData = {
       department: department,
-      total: getTotalForClass(selectedYear, selectedClass),
-      absent:
-        getTotalForClass(selectedYear, selectedClass) -
-        (prevFormData.present ? parseInt(prevFormData.present) : 0),
-    }));
-  }, [selectedYear, selectedClass, fetchdata, department]);
+      [selectedYear]: {
+        classes: [
+          {
+            className: selectedClass,
+            total: updatetotal,
+            regular: updateRegular,
+          },
+        ],
+      },
+    };
 
+    setFormData1(newFormData);
+  }, [selectedClass, selectedYear, department, updatetotal, updateRegular]);
+
+  console.log("selectedyear", selectedYear);
+  console.log("selectedClass", selectedClass);
   const initialFormData = {
-    date: currentDate,
-    class: selectedClass,
-    total: getTotalForClass(selectedYear, selectedClass),
     department: department,
-    present: "",
-    year: selectedYear,
-    absentees: "",
-    absent: "",
+    [selectedYear]: {
+      classes: [
+        {
+          className: "",
+          total: "",
+          regular: "",
+        },
+      ],
+    },
   };
 
+  console.log("updateRegular changed:", updateRegular);
   const [formData1, setFormData1] = useState(initialFormData);
-
-  formData1.absent =
-    getTotalForClass(selectedYear, selectedClass) - formData1.present;
-
   const handleSubmit = async () => {
-    console.log("vm", getTotalForClass(selectedYear, selectedClass).toString());
     console.log("deparment", department);
-    console.log(formData1);
-    console.log("secl");
-    const response = await fetch("https://ams-back.vercel.app/api/attendance", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: token,
-      },
-      body: JSON.stringify(formData1),
-    });
-    if (response.ok) {
-      showToast("Uploaded the attendance!");
-      setFormData1(initialFormData);
-    } else {
-      console.error(" failed");
-      showToast("Failed to upload the attendance!");
+    console.log("formdata1", formData1[selectedYear]);
+    console.log("total", formData1[selectedYear]?.classes[0].total);
+    try {
+      const response = await fetch(
+        `https://ams-back.vercel.app/api/update-total-students/${department}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: token,
+          },
+          body: JSON.stringify(formData1),
+        }
+      );
+
+      if (response.ok) {
+        showToast("Updated the attendance Data!");
+        setFormData1(initialFormData);
+        setUpdatetotal(""); // Resetting to empty string
+        setUpdateRegular(""); // Resetting to empty string
+        setRefreshData((prev) => !prev); // Toggle the refreshData state
+      } else {
+        const errorData = await response.json();
+        console.error("Failed to update:", errorData);
+        showToast("Failed to upload the attendance!");
+      }
+    } catch (error) {
+      console.error("Network request failed:", error);
+      showToast("Network request failed. Please try again.");
     }
   };
   return (
@@ -205,6 +247,7 @@ function UpdateStudentData() {
               selectedValue={department}
               onValueChange={(itemValue) => {
                 setDepartment(itemValue);
+                console.log("department", itemValue);
                 handleInputChange("department", itemValue);
               }}
             >
@@ -247,7 +290,28 @@ function UpdateStudentData() {
             </Picker>
           </View>
           <View>
-            {department === "I YEAR" ? (
+            {department === "MCA" || department === "MBA" ? (
+              <>
+                <Text>Select Year:</Text>
+                <View className="border my-2 rounded-sm">
+                  <Picker
+                    selectedValue={selectedYear}
+                    onValueChange={(itemValue) => {
+                      setSelectedYear(itemValue);
+                      handleInputChange("year", itemValue);
+                    }}
+                  >
+                    <Picker.Item label="Year 1" value="year1" />
+                    <Picker.Item label="Year 2" value="year2" />
+                  </Picker>
+                </View>
+              </>
+            ) : (
+              <></>
+            )}
+            {department === "I YEAR" ||
+            department === "MCA" ||
+            department === "MBA" ? (
               <></>
             ) : (
               <>
@@ -279,8 +343,20 @@ function UpdateStudentData() {
               >
                 <Picker.Item label="A" value="A" />
                 {fetchdata &&
-                  fetchdata[selectedYear].classes[1]?.className === "B" && (
+                  fetchdata[selectedYear]?.classes[1]?.className === "B" && (
                     <Picker.Item label="B" value="B" />
+                  )}
+                {fetchdata &&
+                  fetchdata[selectedYear]?.classes[2]?.className === "C" && (
+                    <Picker.Item label="C" value="C" />
+                  )}
+                {fetchdata &&
+                  fetchdata[selectedYear]?.classes[3]?.className === "D" && (
+                    <Picker.Item label="D" value="D" />
+                  )}
+                {fetchdata &&
+                  fetchdata[selectedYear]?.classes[4]?.className === "E" && (
+                    <Picker.Item label="E" value="E" />
                   )}
               </Picker>
             </View>
@@ -290,20 +366,42 @@ function UpdateStudentData() {
             {getTotalForClass(selectedYear, selectedClass)}
           </Text>
           <TextInput
-            value={formData1.present}
-            onChangeText={(value) => handleInputChange("present", value)}
+            value={updatetotal}
+            onChangeText={(text) => {
+              if (text.trim() !== "") {
+                const numberValue = parseInt(text, 10);
+                if (!isNaN(numberValue)) {
+                  setUpdatetotal(numberValue);
+                } else {
+                  console.warn("Entered value is not a valid number");
+                }
+              } else {
+                setUpdatetotal(0); // or set to a default value or null
+              }
+            }}
             style={styles.input}
-            placeholder="  Students Present"
+            placeholder="Total Count to Update"
           />
           <Text>
             Total Regular Students:
-            {getTotalForClass(selectedYear, selectedClass)}
+            {getRegularForClass(selectedYear, selectedClass)}
           </Text>
           <TextInput
-            value={formData1.absentees}
-            onChangeText={(value) => handleInputChange("absentees", value)}
+            value={updateRegular}
+            onChangeText={(text) => {
+              if (text.trim() !== "") {
+                const numberValue = parseInt(text, 10);
+                if (!isNaN(numberValue)) {
+                  setUpdateRegular(numberValue);
+                } else {
+                  console.warn("Entered value is not a valid number");
+                }
+              } else {
+                setUpdateRegular(0); // or set to a default value or null
+              }
+            }}
             style={styles.input}
-            placeholder="Absentees Number"
+            placeholder="Total Regular to Update"
           />
           <Button
             className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"

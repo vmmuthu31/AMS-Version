@@ -122,6 +122,9 @@ function AddAttendance() {
   useEffect(() => {
     if (department) {
       // Only make the fetch if department is defined
+      if (department === "I YEAR") {
+        setSelectedYear("year1");
+      }
       async function fetchData() {
         const response = await fetch(
           `https://ams-back.vercel.app/api/view-total-students?department=${department}`

@@ -279,6 +279,18 @@ function AddAttendance() {
                   fetchdata[selectedYear]?.classes[1]?.className === "B" && (
                     <Picker.Item label="B" value="B" />
                   )}
+                {fetchdata &&
+                  fetchdata[selectedYear]?.classes[2]?.className === "C" && (
+                    <Picker.Item label="C" value="C" />
+                  )}
+                {fetchdata &&
+                  fetchdata[selectedYear]?.classes[3]?.className === "D" && (
+                    <Picker.Item label="D" value="D" />
+                  )}
+                {fetchdata &&
+                  fetchdata[selectedYear]?.classes[4]?.className === "E" && (
+                    <Picker.Item label="E" value="E" />
+                  )}
               </Picker>
             </View>
 

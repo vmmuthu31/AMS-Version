@@ -56,7 +56,7 @@ function Dashboard() {
     <View style={styles.container}>
       <View className="bg-white pt-2 flex flex-row text-left justify-between text-xl font-bold px-8  border-b">
         <Text className="mt-2 text-2xl font-bold mx-4">Dashboard</Text>
-        <TouchableOpacity className="pb-6" onPress={handleLogout}>
+        <TouchableOpacity className="pb-4 mt-2" onPress={handleLogout}>
           <Image
             className="h-7 w-7 bg-white "
             source={{

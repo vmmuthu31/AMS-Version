@@ -12,28 +12,25 @@ import { AiOutlineArrowLeft } from "react-icons/ai";
 
 const Home = () => {
   return (
-    <View style={{ flex: 1 }} className="bg-[#009FF8] min-h-screen">
-      <View className="bg-white pt-2 flex flex-row text-left text-xl font-bold px-8  border-b">
+    <View style={{ flex: 1 }} className="bg-[#009FF8] min-h-screen pb-10">
+      <View className="bg-white pt-2 flex-row text-left text-xl font-bold px-8 border-b">
         <Text className="my-3 text-2xl font-bold mx-8">Home</Text>
       </View>
-      <View className="relative isolate ">
-        <View className=" bg-white max-w-3xl pt-5">
-          <View className=" flex bg-white  justify-center items-center flex-col  pt-5">
+      <View className="flex-1 relative isolate">
+        <View className="bg-white max-w-3xl   flex-1">
+          <View className=" flex bg-white my-16 justify-center items-center flex-col ">
             <Image
-              className=" h-28 w-28"
+              className="h-16 w-1/6"
               source={{
                 uri: "https://blogger.googleusercontent.com/img/a/AVvXsEjmL38K-8tCjcNKGjvAGHeVHkyN8t1lo68bXI2oqe2WVp8RVuF9ombU-79T9guiG2Z4FRk18nhzTWz5-ZkPpy993uWl7D59MyfLyfz0I5d4fKH2XuKhSC0h9SqofVdxzM-lplb8s_pCCZk3sUyccrZEL3uWAkliNXGUWWX_uCg6txRFRASiN-24sUvaUT0",
               }}
             />
-            <Text className="text-3xl font-bold tracking-tight text-gray-900 sm:text-6xl">
+            <Text className="text-[8vw] font-bold tracking-tight text-gray-900 sm:text-[7vw]">
               JEC - AMS
             </Text>
           </View>
-          <View
-            style={styles.example2}
-            className="bg-[#009FF8]  mt-10 px-10 p-12"
-          >
-            <Text className="text-lg text-gray-100 pt-3 mt-1">
+          <View style={styles.example2} className="flex-1 bg-[#009FF8]   p-12">
+            <Text className="text-[4.5vw]   py-5 font-semibold text-justify   text-gray-100 ">
               A seamless platform for faculties to record and manage student
               attendance. With JEC-AMS, tracking daily attendance and generating
               reports becomes effortless. Whether you're a faculty member
@@ -42,7 +39,7 @@ const Home = () => {
               experience, ensuring accuracy and efficiency.
             </Text>
 
-            <View className="fle flex-row mt-6  items-center justify-center gap-x-6">
+            <View className="flex-row  items-center mt-4 justify-center gap-x-6">
               <TouchableOpacity
                 className="rounded-2xl bg-[#4F14FF] px-6 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
                 onPress={() => {
@@ -69,7 +66,6 @@ const Home = () => {
 const styles = StyleSheet.create({
   example2: {
     borderWidth: 0,
-
     borderTopLeftRadius: 120,
   },
 });

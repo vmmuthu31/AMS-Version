@@ -559,7 +559,7 @@ function GetAttendance() {
                             </View>
                             <View style={styles.recordSubHeader}>
                               <Text style={styles.recordSubHeaderText}>
-                                No. OF Regular: {record.regular}
+                                Regular: {record.regular}
                               </Text>
                               <Text style={styles.recordSubHeaderText}>
                                 Present: {record.present}
@@ -573,10 +573,16 @@ function GetAttendance() {
                             </Text>
                             <View className="flex flex-row justify-end">
                               <View></View>
-                              <Button
-                                title="Edit"
-                                onPress={() => handleUpdate(record)}
-                              />
+                              {role === "superadmin" ? (
+                                <></>
+                              ) : (
+                                <>
+                                  <Button
+                                    title="Edit"
+                                    onPress={() => handleUpdate(record)}
+                                  />
+                                </>
+                              )}
                             </View>
                           </View>
                         );

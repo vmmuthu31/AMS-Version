@@ -18,9 +18,9 @@ const Home = () => {
       </View>
       <View className="flex-1 relative isolate">
         <View className="bg-white max-w-3xl   flex-1">
-          <View className=" flex bg-white my-16 justify-center items-center flex-col ">
+          <View className=" flex bg-white my-10 justify-center items-center flex-col ">
             <Image
-              className="h-16 w-1/6"
+              className="h-20 w-20"
               source={{
                 uri: "https://blogger.googleusercontent.com/img/a/AVvXsEjmL38K-8tCjcNKGjvAGHeVHkyN8t1lo68bXI2oqe2WVp8RVuF9ombU-79T9guiG2Z4FRk18nhzTWz5-ZkPpy993uWl7D59MyfLyfz0I5d4fKH2XuKhSC0h9SqofVdxzM-lplb8s_pCCZk3sUyccrZEL3uWAkliNXGUWWX_uCg6txRFRASiN-24sUvaUT0",
               }}
